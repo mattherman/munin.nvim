@@ -1,0 +1,2 @@
+print(":plugin/init.lua")
+

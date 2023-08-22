@@ -16,9 +16,15 @@ local utils = require("munin.utils")
 local M = {
     config = {
         autoSync = false,
-        extensions = { "md" }
+        patterns = { "*.md" }
     }
 }
+
+local function merge_config_with_default(config)
+    for k, v in pairs(config) do
+        M.config[k] = v
+    end
+end
 
 local function init()
     local cwd = vim.loop.cwd()
@@ -29,6 +35,15 @@ local function init()
 
     if repo.exists() then
         print("Found repo at "..repo._config_path)
+
+        if M.config.autoSync then
+            print("Auto sync enabled, indexing repo...")
+            local index_err = require("munin.indexer").index(repo --[[ TODO: pass patterns --]])
+            if index_err then
+                print(string.format("Failed to index repo (%s): %s", repo._path, index_err))
+            end
+        end
+
         return repo
     end
 end
@@ -67,7 +82,7 @@ local function directory_changed(event)
 end
 
 function M.setup(config)
-    if config then M.config = config end
+    if config then merge_config_with_default(config) end
 
     M.repo = init()
 
@@ -80,13 +95,13 @@ function M.setup(config)
 
     vim.api.nvim_create_autocmd({"BufEnter"}, {
         group = group,
-        pattern = {"*.md"},
+        pattern = M.config.patterns,
         callback = buffer_entered
     })
 
     vim.api.nvim_create_autocmd({"BufWrite"}, {
         group = group,
-        pattern = {"*.md"},
+        pattern = M.config.patterns,
         callback = buffer_write
     })
 end

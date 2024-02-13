@@ -1,2 +1,1 @@
-print(":plugin/init.lua")
 

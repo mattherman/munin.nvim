@@ -12,6 +12,8 @@ require("munin.logger").configure(log)
 local munin = require("munin.repo")
 local utils = require("munin.utils")
 
+local finders = require("nvim-munin.finders")
+
 local M = {
     config = {
         autoSync = false,
@@ -131,7 +133,7 @@ function M.search_tag_under_cursor()
     if notes then
         local message = string.format("Found %d notes matching tag", #notes)
         log.trace(message)
-        vim.notify(message)
+        finders.find_notes_by_tag(notes, { tag = tag, repo = M.repo })
     else
         log.error(err)
     end
